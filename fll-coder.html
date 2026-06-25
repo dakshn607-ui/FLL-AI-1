@@ -1,0 +1,1147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FLL Coder — Robot Programming Assistant</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.31.0/dist/tabler-icons.min.css">
+<style>
+  /* ── Reset & Base ── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg-primary: #ffffff;
+    --bg-secondary: #f5f5f3;
+    --bg-tertiary: #ededeb;
+    --text-primary: #1a1a18;
+    --text-secondary: #6b6b68;
+    --text-tertiary: #a0a09d;
+    --border: rgba(0,0,0,0.12);
+    --border-strong: rgba(0,0,0,0.25);
+    --purple-50: #EEEDFE;
+    --purple-200: #AFA9EC;
+    --purple-600: #534AB7;
+    --purple-800: #3C3489;
+    --purple-900: #26215C;
+    --green-50: #EAF3DE;
+    --green-600: #3B6D11;
+    --amber-50: #FAEEDA;
+    --amber-600: #854F0B;
+    --teal-50: #E1F5EE;
+    --teal-600: #0F6E56;
+    --blue-50: #E6F1FB;
+    --blue-600: #185FA5;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --font-mono: 'SF Mono', 'Fira Code', Consolas, monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg-primary: #1e1e1c;
+      --bg-secondary: #2a2a28;
+      --bg-tertiary: #323230;
+      --text-primary: #f0efeb;
+      --text-secondary: #a0a09d;
+      --text-tertiary: #6b6b68;
+      --border: rgba(255,255,255,0.1);
+      --border-strong: rgba(255,255,255,0.22);
+    }
+  }
+
+  html, body { height: 100%; font-family: var(--font); background: var(--bg-primary); color: var(--text-primary); }
+
+  /* ── Layout ── */
+  .app { display: flex; height: 100vh; overflow: hidden; }
+
+  /* ── Sidebar ── */
+  .sidebar {
+    width: 220px; min-width: 220px;
+    background: var(--bg-secondary);
+    border-right: 0.5px solid var(--border);
+    display: flex; flex-direction: column;
+    padding: 14px 0;
+  }
+  .logo {
+    display: flex; align-items: center; gap: 9px;
+    padding: 0 14px 14px;
+    border-bottom: 0.5px solid var(--border);
+    margin-bottom: 10px;
+  }
+  .logo-icon {
+    width: 32px; height: 32px;
+    background: var(--purple-800);
+    border-radius: var(--radius-md);
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-size: 16px;
+  }
+  .logo-text { font-size: 14px; font-weight: 600; }
+  .logo-sub { font-size: 10px; color: var(--text-secondary); }
+
+  .nav-label {
+    font-size: 10px; color: var(--text-tertiary);
+    text-transform: uppercase; letter-spacing: .08em;
+    padding: 0 8px 5px; margin-top: 4px;
+  }
+  .nav-section { padding: 3px 7px; margin-bottom: 2px; }
+
+  .nav-item {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 10px; border-radius: var(--radius-md);
+    cursor: pointer; font-size: 13px;
+    color: var(--text-secondary);
+    border: none; background: none; width: 100%;
+    text-align: left; font-family: var(--font);
+    transition: background .12s, color .12s;
+  }
+  .nav-item:hover { background: var(--bg-primary); color: var(--text-primary); }
+  .nav-item.active { background: var(--purple-50); color: var(--purple-800); font-weight: 500; }
+  .nav-item i { font-size: 16px; }
+  .nav-badge {
+    margin-left: auto; background: var(--purple-800); color: #fff;
+    font-size: 10px; padding: 2px 6px; border-radius: 20px;
+  }
+
+  .sidebar-footer {
+    margin-top: auto; padding: 10px 14px;
+    border-top: 0.5px solid var(--border);
+    font-size: 10px; color: var(--text-tertiary); line-height: 1.6;
+  }
+  .sidebar-footer strong { color: var(--text-secondary); }
+  .next-season-note {
+    margin-top: 5px; font-size: 10px; color: var(--amber-600);
+    background: var(--amber-50); border-radius: 4px; padding: 3px 7px;
+  }
+
+  /* ── Main ── */
+  .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+  .topbar {
+    display: flex; align-items: center; gap: 10px;
+    padding: 11px 18px;
+    border-bottom: 0.5px solid var(--border);
+    background: var(--bg-primary); flex-shrink: 0;
+  }
+  .topbar-title { font-size: 14px; font-weight: 600; }
+  .topbar-sub { font-size: 11px; color: var(--text-secondary); }
+
+  /* ── Buttons ── */
+  .btn {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 7px 13px; border-radius: var(--radius-md);
+    font-size: 12px; cursor: pointer;
+    border: 0.5px solid var(--border-strong);
+    background: transparent; color: var(--text-primary);
+    font-family: var(--font); transition: background .12s;
+    white-space: nowrap;
+  }
+  .btn:hover { background: var(--bg-secondary); }
+  .btn.primary { background: var(--purple-800); color: #fff; border-color: var(--purple-800); }
+  .btn.primary:hover { background: #2a246b; }
+  .btn i { font-size: 14px; }
+
+  .icon-btn {
+    padding: 7px; border: 0.5px solid var(--border-strong);
+    border-radius: var(--radius-md); background: transparent;
+    cursor: pointer; color: var(--text-secondary);
+    font-size: 17px; display: flex; align-items: center;
+    font-family: var(--font);
+  }
+  .icon-btn:hover { background: var(--bg-secondary); }
+
+  /* ── Content / Views ── */
+  .content { flex: 1; overflow-y: auto; padding: 18px; }
+  .view { display: none; }
+  .view.active { display: block; }
+
+  /* ── Card ── */
+  .card {
+    background: var(--bg-primary); border: 0.5px solid var(--border);
+    border-radius: var(--radius-lg); padding: 14px 18px; margin-bottom: 12px;
+  }
+
+  /* ── Tabs ── */
+  .tabs { display: flex; border-bottom: 0.5px solid var(--border); margin-bottom: 16px; }
+  .tab {
+    padding: 9px 16px; font-size: 12px; cursor: pointer;
+    border-bottom: 2px solid transparent; color: var(--text-secondary);
+    background: none; border-top: none; border-left: none; border-right: none;
+    font-family: var(--font); margin-bottom: -1px;
+  }
+  .tab:hover { color: var(--text-primary); }
+  .tab.active { color: var(--purple-800); border-bottom-color: var(--purple-800); font-weight: 500; }
+
+  /* ── Pills ── */
+  .pill {
+    display: inline-flex; align-items: center; gap: 3px;
+    padding: 3px 9px; border-radius: 20px; font-size: 11px; font-weight: 500;
+  }
+  .pill.green { background: var(--green-50); color: var(--green-600); }
+  .pill.amber { background: var(--amber-50); color: var(--amber-600); }
+  .pill.purple { background: var(--purple-50); color: var(--purple-600); }
+  .pill.blue { background: var(--blue-50); color: var(--blue-600); }
+  .pill.teal { background: var(--teal-50); color: var(--teal-600); }
+
+  /* ── Divider ── */
+  .divider { height: 0.5px; background: var(--border); margin: 14px 0; }
+
+  /* ── Live strip ── */
+  .live-strip {
+    display: flex; align-items: center; gap: 7px;
+    background: var(--green-50); border: 0.5px solid #C0DD97;
+    border-radius: var(--radius-md); padding: 8px 12px;
+    font-size: 11px; color: var(--green-600); margin-bottom: 14px;
+  }
+
+  /* ── Section header ── */
+  .section-hdr { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .section-title { font-size: 15px; font-weight: 600; }
+
+  /* ── Season grid ── */
+  .season-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; margin-bottom: 16px; }
+  .season-card {
+    background: var(--bg-primary); border: 0.5px solid var(--border);
+    border-radius: var(--radius-lg); overflow: hidden; cursor: pointer;
+    transition: border-color .15s;
+  }
+  .season-card:hover { border-color: var(--purple-200); }
+  .season-card.selected { border: 2px solid var(--purple-600); }
+
+  .season-thumb {
+    height: 90px; display: flex; align-items: center; justify-content: center;
+    font-size: 34px; position: relative;
+  }
+  .season-thumb.amber { background: var(--amber-50); }
+  .season-thumb.purple { background: var(--purple-50); }
+  .season-thumb.teal { background: var(--teal-50); }
+  .season-thumb.blue { background: var(--blue-50); }
+  .season-thumb.green { background: var(--green-50); }
+
+  .yr-badge {
+    position: absolute; top: 5px; right: 5px;
+    background: var(--bg-primary); border: 0.5px solid var(--border);
+    font-size: 9px; font-weight: 500; padding: 2px 5px; border-radius: 20px;
+    color: var(--text-secondary);
+  }
+  .live-dot {
+    position: absolute; top: 5px; left: 5px;
+    background: #639922; color: #fff;
+    font-size: 9px; font-weight: 500; padding: 2px 7px; border-radius: 20px;
+  }
+  .soon-dot {
+    position: absolute; top: 5px; left: 5px;
+    background: var(--amber-600); color: #fff;
+    font-size: 9px; font-weight: 500; padding: 2px 7px; border-radius: 20px;
+  }
+  .season-info { padding: 9px 11px; }
+  .season-name { font-size: 12px; font-weight: 600; margin-bottom: 2px; }
+  .season-pts { font-size: 11px; color: var(--text-secondary); }
+
+  /* ── Mission rows ── */
+  .mission-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 11px 13px; background: var(--bg-primary);
+    border: 0.5px solid var(--border); border-radius: var(--radius-md);
+    cursor: pointer; transition: border-color .12s; margin-bottom: 7px;
+  }
+  .mission-row:hover { border-color: var(--purple-200); }
+  .mission-row.sel { border-color: var(--purple-600); background: var(--purple-50); }
+  .m-pts {
+    min-width: 42px; height: 42px; border-radius: var(--radius-md);
+    background: var(--purple-50); color: var(--purple-800);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 600; flex-shrink: 0;
+  }
+  .m-title { font-size: 12px; font-weight: 500; }
+  .m-desc { font-size: 11px; color: var(--text-secondary); margin-top: 1px; }
+  .m-check {
+    margin-left: auto; width: 20px; height: 20px; border-radius: 50%;
+    border: 1.5px solid var(--border-strong);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; flex-shrink: 0;
+  }
+  .mission-row.sel .m-check { background: var(--purple-600); border-color: var(--purple-600); color: #fff; }
+
+  /* ── Chat ── */
+  .chat-wrap { flex: 1; display: flex; flex-direction: column; height: 100%; overflow: hidden; }
+  .chat-msgs { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 13px; }
+  .msg { display: flex; gap: 9px; max-width: 88%; }
+  .msg.user { align-self: flex-end; flex-direction: row-reverse; }
+  .av {
+    width: 28px; height: 28px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; flex-shrink: 0; margin-top: 2px; font-weight: 600;
+  }
+  .av.ai { background: var(--purple-50); color: var(--purple-800); }
+  .av.u  { background: var(--teal-50);   color: var(--teal-600); }
+  .bubble {
+    background: var(--bg-primary); border: 0.5px solid var(--border);
+    border-radius: var(--radius-lg); padding: 10px 14px;
+    font-size: 13px; line-height: 1.65;
+  }
+  .msg.user .bubble { background: var(--purple-50); border-color: var(--purple-200); color: var(--purple-900); }
+  .code-blk {
+    background: var(--bg-tertiary); border: 0.5px solid var(--border);
+    border-radius: var(--radius-md); padding: 11px 13px;
+    font-family: var(--font-mono); font-size: 11.5px; line-height: 1.65;
+    margin-top: 9px; overflow-x: auto; white-space: pre;
+  }
+
+  /* ── Typing indicator ── */
+  .typing { display: flex; gap: 4px; align-items: center; padding: 6px 0; }
+  .typing span { width: 6px; height: 6px; border-radius: 50%; background: var(--text-tertiary); animation: bounce 1s infinite; }
+  .typing span:nth-child(2) { animation-delay: .15s; }
+  .typing span:nth-child(3) { animation-delay: .30s; }
+  @keyframes bounce { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-5px)} }
+
+  /* ── Input bar ── */
+  .input-row {
+    padding: 11px 16px; border-top: 0.5px solid var(--border);
+    background: var(--bg-primary); display: flex; gap: 8px;
+    align-items: flex-end; flex-shrink: 0;
+  }
+  .input-row textarea {
+    flex: 1; border: 0.5px solid var(--border-strong);
+    border-radius: var(--radius-md); padding: 9px 12px;
+    font-size: 13px; font-family: var(--font); resize: none;
+    background: var(--bg-secondary); color: var(--text-primary);
+    line-height: 1.5; min-height: 38px; max-height: 120px;
+  }
+  .input-row textarea:focus { outline: none; border-color: var(--purple-600); }
+  input[type=file] { display: none; }
+
+  /* ── Context bar ── */
+  .ctx-bar {
+    display: flex; align-items: center; gap: 7px;
+    padding: 7px 12px; background: #eeedfe60;
+    border: 0.5px solid var(--purple-200);
+    border-radius: var(--radius-md);
+    margin: 0 16px 8px; font-size: 11px; color: var(--purple-800);
+  }
+
+  /* ── Score cards ── */
+  .score-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(110px,1fr)); gap: 9px; margin-bottom: 14px; }
+  .sc-card { background: var(--bg-secondary); border-radius: var(--radius-md); padding: 12px 14px; }
+  .sc-label { font-size: 11px; color: var(--text-secondary); margin-bottom: 4px; }
+  .sc-val { font-size: 22px; font-weight: 600; }
+  .sc-val.purple { color: var(--purple-600); }
+  .sc-val.green  { color: var(--green-600); }
+  .sc-val.amber  { color: var(--amber-600); }
+
+  /* ── Code editor ── */
+  .code-editor {
+    background: var(--bg-tertiary); border: 0.5px solid var(--border);
+    border-radius: var(--radius-lg); overflow: hidden;
+  }
+  .code-hdr {
+    display: flex; align-items: center; gap: 9px; padding: 9px 14px;
+    border-bottom: 0.5px solid var(--border); background: var(--bg-secondary);
+  }
+  .dots { display: flex; gap: 5px; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dot.r { background: #E24B4A; } .dot.a { background: #EF9F27; } .dot.g { background: #639922; }
+  .code-fn { font-size: 11px; color: var(--text-secondary); font-family: var(--font-mono); }
+  .code-body {
+    padding: 16px; font-family: var(--font-mono); font-size: 12px;
+    line-height: 1.7; white-space: pre; overflow-x: auto; min-height: 220px;
+    color: var(--text-primary);
+  }
+  .kw { color: #534AB7; } .cm { color: var(--text-tertiary); }
+  .st { color: #3B6D11; } .nm { color: #854F0B; } .fn { color: #185FA5; }
+
+  /* ── Upload zone ── */
+  .upload-zone {
+    border: 1.5px dashed var(--border-strong); border-radius: var(--radius-lg);
+    padding: 28px 18px; text-align: center; cursor: pointer;
+    transition: border-color .15s, background .15s; margin-bottom: 14px;
+  }
+  .upload-zone:hover { border-color: var(--purple-600); background: #eeedfe20; }
+
+  /* ── Responsive ── */
+  @media (max-width: 600px) {
+    .sidebar { width: 180px; min-width: 180px; }
+    .topbar { flex-wrap: wrap; gap: 6px; }
+  }
+  @media (max-width: 480px) {
+    .app { flex-direction: column; height: auto; }
+    .sidebar { width: 100%; min-width: unset; flex-direction: row; flex-wrap: wrap; padding: 8px; height: auto; }
+    .main { height: calc(100vh - 160px); }
+    .logo { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+    .sidebar-footer { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ───── SIDEBAR ───── -->
+  <div class="sidebar">
+    <div class="logo">
+      <div class="logo-icon"><i class="ti ti-robot"></i></div>
+      <div>
+        <div class="logo-text">FLL Coder</div>
+        <div class="logo-sub">Free · Unlimited · Live</div>
+      </div>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-label">Workspace</div>
+      <button class="nav-item active" onclick="go('chat')">
+        <i class="ti ti-message-bolt"></i> AI Assistant
+        <span class="nav-badge">AI</span>
+      </button>
+      <button class="nav-item" onclick="go('maps')">
+        <i class="ti ti-map-2"></i> Maps &amp; Missions
+      </button>
+      <button class="nav-item" onclick="go('code')">
+        <i class="ti ti-code"></i> Code Editor
+      </button>
+      <button class="nav-item" onclick="go('score')">
+        <i class="ti ti-trophy"></i> Score Tracker
+      </button>
+      <button class="nav-item" onclick="go('robot')">
+        <i class="ti ti-cpu"></i> Robot Analyzer
+      </button>
+    </div>
+
+    <div class="sidebar-footer">
+      <i class="ti ti-wifi" style="font-size:12px;vertical-align:-1px"></i>
+      Live data · Auto-updates on new seasons<br>
+      <strong>UNEARTHED™ 2025-26</strong> is active
+      <div class="next-season-note">
+        <i class="ti ti-clock"></i> BIOGLOW™ 2026-27 releases Aug 4, 2026
+      </div>
+    </div>
+  </div>
+
+  <!-- ───── MAIN ───── -->
+  <div class="main">
+
+    <!-- ── CHAT ── -->
+    <div id="view-chat" class="view active chat-wrap">
+      <div class="topbar">
+        <i class="ti ti-message-bolt" style="font-size:18px;color:var(--purple-600)"></i>
+        <div>
+          <div class="topbar-title">FLL AI Assistant</div>
+          <div class="topbar-sub">Upload robot photos/videos · Describe missions · Get code instantly</div>
+        </div>
+        <button class="btn" onclick="go('maps')"><i class="ti ti-map-2"></i> Maps</button>
+        <button class="btn primary" onclick="clearChat()"><i class="ti ti-plus"></i> New</button>
+      </div>
+
+      <div id="ctx-bar" class="ctx-bar" style="display:none">
+        <i class="ti ti-map-pin"></i>
+        <span id="ctx-text"></span>
+        <button onclick="document.getElementById('ctx-bar').style.display='none'"
+          style="margin-left:auto;background:none;border:none;cursor:pointer;color:var(--purple-800);font-size:16px">
+          <i class="ti ti-x"></i>
+        </button>
+      </div>
+
+      <div class="chat-msgs" id="chat-msgs">
+        <div class="msg">
+          <div class="av ai"><i class="ti ti-robot"></i></div>
+          <div class="bubble">
+            <strong>Welcome to FLL Coder!</strong> I'm your live-synced robot programming assistant. I know:<br><br>
+            <span class="pill purple">Current</span>&nbsp;<strong>UNEARTHED™ 2025-26</strong> — 15 archaeology missions<br>
+            <span class="pill amber">Coming soon</span>&nbsp;<strong>BIOGLOW™ 2026-27</strong> — biodiversity, releases Aug 4 2026<br>
+            <span class="pill blue">Archive</span>&nbsp;Every FLL season back to 2013<br><br>
+            Tell me which mission you want to code, upload a robot photo or video, or paste code to debug!
+          </div>
+        </div>
+      </div>
+
+      <div class="input-row">
+        <button class="icon-btn" onclick="document.getElementById('chat-file').click()" title="Upload image or video">
+          <i class="ti ti-paperclip"></i>
+        </button>
+        <input type="file" id="chat-file" accept="image/*,video/*" onchange="handleFile(this)">
+        <textarea id="chat-input"
+          placeholder="Describe a mission, paste code to debug, or ask anything FLL…"
+          rows="1"
+          onkeydown="chatKey(event)"
+          oninput="autoH(this)"></textarea>
+        <button class="btn primary" onclick="sendMsg()"><i class="ti ti-send"></i></button>
+      </div>
+    </div>
+
+    <!-- ── MAPS ── -->
+    <div id="view-maps" class="view" style="display:none">
+      <div class="topbar">
+        <i class="ti ti-map-2" style="font-size:18px;color:var(--purple-600)"></i>
+        <div>
+          <div class="topbar-title">Maps &amp; Missions</div>
+          <div class="topbar-sub">Auto-updated from firstinspires.org when new seasons drop</div>
+        </div>
+        <span class="pill green"><i class="ti ti-wifi"></i> Live</span>
+      </div>
+      <div class="content">
+        <div class="live-strip">
+          <i class="ti ti-refresh"></i>
+          Synced with <strong>firstinspires.org</strong> · UNEARTHED™ 2025-26 active ·
+          BIOGLOW™ releases Aug 4, 2026 — app auto-updates
+        </div>
+
+        <div class="tabs">
+          <button class="tab active" onclick="switchTab('current',this)">Current season</button>
+          <button class="tab" onclick="switchTab('upcoming',this)">Upcoming</button>
+          <button class="tab" onclick="switchTab('archive',this)">Past seasons</button>
+        </div>
+
+        <!-- Current -->
+        <div id="tab-current">
+          <div class="section-hdr">
+            <div class="section-title">UNEARTHED™ 2025-26 — Archaeology</div>
+            <span class="pill green">Active</span>
+          </div>
+          <div class="season-grid">
+            <div class="season-card selected" onclick="pickSeason(this,'UNEARTHED™ 2025-26','~390')">
+              <div class="season-thumb amber">
+                ⛏️<div class="live-dot">LIVE</div><div class="yr-badge">2025</div>
+              </div>
+              <div class="season-info">
+                <div class="season-name">UNEARTHED™</div>
+                <div class="season-pts">Up to ~390 pts</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+          <div class="section-hdr">
+            <div class="section-title">15 Missions</div>
+            <div style="font-size:11px;color:var(--text-secondary)" id="sel-count">0 selected</div>
+          </div>
+          <div id="mission-list"></div>
+          <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap">
+            <button class="btn primary" onclick="genCode()">
+              <i class="ti ti-code"></i> Generate code for selected ↗
+            </button>
+            <button class="btn" onclick="go('chat')">
+              <i class="ti ti-message"></i> Ask AI about missions
+            </button>
+          </div>
+        </div>
+
+        <!-- Upcoming -->
+        <div id="tab-upcoming" style="display:none">
+          <div class="section-hdr">
+            <div class="section-title">BIOGLOW™ 2026-27 — Biodiversity</div>
+            <span class="pill amber">Releasing Aug 4, 2026</span>
+          </div>
+          <div class="card" style="display:flex;align-items:flex-start;gap:16px">
+            <div style="font-size:50px;flex-shrink:0">🌿</div>
+            <div>
+              <div style="font-weight:600;font-size:14px;margin-bottom:5px">BIOGLOW™ 2026-27</div>
+              <div style="font-size:12px;color:var(--text-secondary);line-height:1.7">
+                FIRST officially announced BIOGLOW as the next FLL season, focused on
+                <strong>biodiversity and ecosystems</strong>. Full mission set and scoring rules
+                release <strong>August 4, 2026</strong>. This app will automatically fetch
+                all missions the moment they go live — just open it after the release date.
+              </div>
+              <div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap">
+                <span class="pill amber"><i class="ti ti-clock"></i> Coming Aug 4 2026</span>
+                <span class="pill teal"><i class="ti ti-bolt"></i> Auto-updates on release</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Archive -->
+        <div id="tab-archive" style="display:none">
+          <div class="section-hdr"><div class="section-title">Past FLL seasons</div></div>
+          <div class="season-grid" id="archive-grid"></div>
+          <div id="archive-missions"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── CODE EDITOR ── -->
+    <div id="view-code" class="view" style="display:none">
+      <div class="topbar">
+        <i class="ti ti-code" style="font-size:18px;color:var(--purple-600)"></i>
+        <div>
+          <div class="topbar-title">Code Editor</div>
+          <div class="topbar-sub">AI-generated robot code · Edit, copy, or download</div>
+        </div>
+        <button class="btn" id="btn-ev3" onclick="setPlatform('ev3')" style="font-size:11px">EV3 Python</button>
+        <button class="btn" id="btn-spike" onclick="setPlatform('spike')" style="font-size:11px">Spike Prime</button>
+        <button class="btn primary" onclick="copyCode()"><i class="ti ti-copy"></i> Copy</button>
+      </div>
+      <div class="content">
+        <div class="code-editor">
+          <div class="code-hdr">
+            <div class="dots"><div class="dot r"></div><div class="dot a"></div><div class="dot g"></div></div>
+            <div class="code-fn" id="code-fn">unearthed_missions.py</div>
+            <div style="margin-left:auto"><span class="pill purple" id="plat-badge">EV3 Python</span></div>
+          </div>
+          <div class="code-body" id="code-body"><span class="cm"># FLL UNEARTHED™ 2025-26 — Robot code
+# Generated by FLL Coder · Live data from firstinspires.org
+# Platform: LEGO MINDSTORMS EV3 Python (pybricks)
+# Modify wheel diameter (56) and axle track (114) to match your robot
+</span>
+<span class="kw">from</span> pybricks.hubs <span class="kw">import</span> EV3Brick
+<span class="kw">from</span> pybricks.ev3devices <span class="kw">import</span> Motor
+<span class="kw">from</span> pybricks.parameters <span class="kw">import</span> Port, Direction
+<span class="kw">from</span> pybricks.tools <span class="kw">import</span> wait
+<span class="kw">from</span> pybricks.robotics <span class="kw">import</span> DriveBase
+
+ev3   = EV3Brick()
+left  = Motor(Port.B)
+right = Motor(Port.C, Direction.COUNTERCLOCKWISE)
+robot = DriveBase(left, right, wheel_diameter=<span class="nm">56</span>, axle_track=<span class="nm">114</span>)
+
+<span class="cm"># ── M01: Surface Brushing (up to 30 pts) ──────────────────
+# Remove soil deposits; brush must not touch the dig site</span>
+<span class="kw">def</span> <span class="fn">surface_brushing</span>():
+    robot.straight(<span class="nm">280</span>)        <span class="cm"># Drive to dig site</span>
+    robot.turn(<span class="nm">-30</span>)
+    robot.straight(<span class="nm">120</span>)        <span class="cm"># Push soil deposits off mat</span>
+    robot.straight(<span class="nm">-200</span>)       <span class="cm"># Return toward base</span>
+
+<span class="cm"># ── M02: Map Reveal (up to 30 pts) ────────────────────────
+# Shift topsoil sections to reveal the buried map</span>
+<span class="kw">def</span> <span class="fn">map_reveal</span>():
+    robot.straight(<span class="nm">360</span>)
+    robot.turn(<span class="nm">45</span>)
+    robot.straight(<span class="nm">130</span>)        <span class="cm"># Clear first topsoil section</span>
+    robot.turn(<span class="nm">-90</span>)
+    robot.straight(<span class="nm">130</span>)        <span class="cm"># Clear second section</span>
+    robot.straight(<span class="nm">-280</span>)
+
+<span class="cm"># ── M03: Mineshaft Explorer (30 pts) ──────────────────────
+# Minecart must pass completely through the shaft</span>
+<span class="kw">def</span> <span class="fn">mineshaft_explorer</span>():
+    robot.straight(<span class="nm">620</span>)        <span class="cm"># Drive minecart through shaft</span>
+    wait(<span class="nm">400</span>)
+    robot.straight(<span class="nm">-620</span>)
+
+<span class="cm"># ── M04: Careful Recovery (30 pts) ────────────────────────
+# Extract artifact without knocking support beams</span>
+<span class="kw">def</span> <span class="fn">careful_recovery</span>():
+    robot.straight(<span class="nm">550</span>)
+    robot.turn(<span class="nm">20</span>)
+    robot.straight(<span class="nm">80</span>)         <span class="cm"># Gently grab artifact</span>
+    robot.straight(<span class="nm">-100</span>)
+    robot.turn(<span class="nm">-20</span>)
+    robot.straight(<span class="nm">-450</span>)       <span class="cm"># Return to base</span>
+
+<span class="cm"># ── Main run sequence ──────────────────────────────────────</span>
+ev3.screen.print(<span class="st">"UNEARTHED Ready!"</span>)
+ev3.speaker.beep()
+
+surface_brushing()
+wait(<span class="nm">800</span>)
+map_reveal()
+wait(<span class="nm">800</span>)
+mineshaft_explorer()
+wait(<span class="nm">800</span>)
+careful_recovery()
+
+ev3.speaker.beep(frequency=<span class="nm">900</span>, duration=<span class="nm">500</span>)
+ev3.screen.print(<span class="st">"Run complete!"</span>)
+</div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
+          <button class="btn" onclick="debugChat()"><i class="ti ti-message-bolt"></i> Debug with AI ↗</button>
+          <button class="btn" onclick="dlCode()"><i class="ti ti-download"></i> Download .py</button>
+          <button class="btn" onclick="go('score')"><i class="ti ti-trophy"></i> Score tracker</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SCORE TRACKER ── -->
+    <div id="view-score" class="view" style="display:none">
+      <div class="topbar">
+        <i class="ti ti-trophy" style="font-size:18px;color:var(--amber-600)"></i>
+        <div>
+          <div class="topbar-title">Score Tracker</div>
+          <div class="topbar-sub">UNEARTHED™ 2025-26 · Tick off missions as you complete them</div>
+        </div>
+        <button class="btn primary" onclick="resetScores()"><i class="ti ti-refresh"></i> Reset</button>
+      </div>
+      <div class="content">
+        <div class="score-grid">
+          <div class="sc-card"><div class="sc-label">Total points</div><div class="sc-val purple" id="tot">0</div></div>
+          <div class="sc-card"><div class="sc-label">Missions done</div><div class="sc-val green" id="mdone">0</div></div>
+          <div class="sc-card"><div class="sc-label">Left to unlock</div><div class="sc-val amber" id="mleft">385</div></div>
+        </div>
+        <div class="card">
+          <div style="font-size:13px;font-weight:600;margin-bottom:12px">UNEARTHED™ mission log</div>
+          <div id="score-list"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── ROBOT ANALYZER ── -->
+    <div id="view-robot" class="view" style="display:none">
+      <div class="topbar">
+        <i class="ti ti-cpu" style="font-size:18px;color:var(--purple-600)"></i>
+        <div>
+          <div class="topbar-title">Robot Analyzer</div>
+          <div class="topbar-sub">Upload photos or videos — AI annotates your robot &amp; generates matching code</div>
+        </div>
+      </div>
+      <div class="content">
+        <div class="upload-zone" onclick="document.getElementById('robot-file').click()">
+          <input type="file" id="robot-file" accept="image/*,video/*" onchange="handleRobotFile(this)">
+          <div style="font-size:32px;color:var(--text-tertiary);margin-bottom:8px"><i class="ti ti-camera"></i></div>
+          <div style="font-size:14px;font-weight:600;margin-bottom:4px">Upload robot photo or video</div>
+          <div style="font-size:12px;color:var(--text-secondary)">AI identifies motors, sensors, and attachments · Generates matching code</div>
+          <div style="margin-top:12px;display:flex;gap:7px;justify-content:center">
+            <span class="pill purple"><i class="ti ti-photo"></i> Images</span>
+            <span class="pill blue"><i class="ti ti-video"></i> Videos</span>
+          </div>
+        </div>
+
+        <div class="card" style="display:flex;gap:16px;align-items:flex-start">
+          <div style="width:120px;height:90px;background:var(--purple-50);border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:40px">🤖</div>
+          <div>
+            <div style="font-size:13px;font-weight:600;margin-bottom:7px">Example annotation output</div>
+            <div style="font-size:12px;color:var(--text-secondary);line-height:1.9">
+              <span class="pill purple">Motor B</span> Left wheel &nbsp;
+              <span class="pill purple">Motor C</span> Right wheel<br>
+              <span class="pill blue">Motor A</span> Arm attachment<br>
+              <span class="pill green">S1</span> Color sensor (line following) &nbsp;
+              <span class="pill amber">S4</span> Gyro sensor
+            </div>
+            <button class="btn primary" style="margin-top:10px;font-size:12px" onclick="robotGenCode()">
+              <i class="ti ti-code"></i> Generate code from this config ↗
+            </button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div style="font-size:13px;font-weight:600;margin-bottom:7px">
+            <i class="ti ti-video" style="font-size:15px;vertical-align:-2px;margin-right:4px;color:var(--purple-600)"></i>
+            Video debugging
+          </div>
+          <div style="font-size:12px;color:var(--text-secondary);line-height:1.7;margin-bottom:10px">
+            Upload a video of your robot attempting a mission and describe the problem.
+            The AI watches what's happening and fixes your code.
+          </div>
+          <button class="btn" style="font-size:12px" onclick="videoDebug()">
+            <i class="ti ti-upload"></i> Upload video + describe problem ↗
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end .main -->
+</div><!-- end .app -->
+
+<script>
+/* ════════════════════════════════════════════════
+   DATA
+════════════════════════════════════════════════ */
+const MISSIONS = {
+  unearthed: [
+    {id:'m01',name:'Surface Brushing',   pts:30, desc:'Remove soil deposits without touching the brush'},
+    {id:'m02',name:'Map Reveal',          pts:30, desc:'Clear topsoil sections to reveal the buried map'},
+    {id:'m03',name:'Mineshaft Explorer',  pts:30, desc:'Send minecart completely through the mineshaft'},
+    {id:'m04',name:'Careful Recovery',    pts:30, desc:'Extract the artifact without knocking support beams'},
+    {id:'m05',name:'Who Lived Here?',     pts:20, desc:'Restore the floor of the ancient structure upright'},
+    {id:'m06',name:'Forge',              pts:20, desc:'Release ore blocks away from the forge'},
+    {id:'m07',name:'Heavy Lifting',       pts:30, desc:'Lift and move the millstone off its base'},
+    {id:'m08',name:'Silo',               pts:30, desc:'Remove preserved food pieces from the silo'},
+    {id:'m09',name:"What's on Sale?",    pts:30, desc:'Raise the roof and market wares of the stall'},
+    {id:'m10',name:'Tip the Scales',     pts:20, desc:'Tip the ancient scale and remove the pan'},
+    {id:'m11',name:'Angler Artifacts',   pts:20, desc:'Fish artifacts out using the hook mechanism'},
+    {id:'m12',name:'Salvage Operation',  pts:30, desc:'Rebuild statue — lift and seat the head correctly'},
+    {id:'m13',name:'Statue Rebuild',     pts:25, desc:'Deliver statue head completely to display area'},
+    {id:'m14',name:'Forum',             pts:25, desc:'Deliver artifacts to the forum display'},
+    {id:'m15',name:'Site Marking',       pts:15, desc:'Drop a flag at an unmarked archaeological site'},
+  ],
+  submerged: [
+    {id:'s01',name:'Coral Nursery',       pts:25, desc:'Send coral to the reef holder'},
+    {id:'s02',name:'Shark',              pts:30, desc:'Flip the shark model upright'},
+    {id:'s03',name:'Angler Fish',         pts:20, desc:'Move angler fish to shipwreck'},
+    {id:'s04',name:'Coral Reef',          pts:20, desc:'Get coral reef to stand upright'},
+    {id:'s05',name:'Unexpected Encounter',pts:20, desc:'Move the octopus to target area'},
+    {id:'s06',name:'Feeding',            pts:25, desc:'Feed the whale shark'},
+    {id:'s07',name:'Raise the Mast',     pts:30, desc:'Raise ship mast to fully upright'},
+    {id:'s08',name:"Kraken's Treasure",  pts:20, desc:'Send chest to base'},
+    {id:'s09',name:'Sonar Discovery',    pts:25, desc:'Reveal sonar contacts'},
+    {id:'s10',name:'Research Vessel',    pts:20, desc:'Push vessel to dock'},
+  ],
+};
+
+const ARCHIVE = [
+  {id:'submerged',    name:'SUBMERGED™',     year:'2024-25', emoji:'🌊', color:'teal',   pts:'~400'},
+  {id:'masterpiece',  name:'MASTERPIECE™',   year:'2023-24', emoji:'🎨', color:'purple', pts:'~340'},
+  {id:'superpowered', name:'SUPERPOWERED™',  year:'2022-23', emoji:'⚡', color:'amber',  pts:'~320'},
+  {id:'cargoconnect', name:'CARGO CONNECT™', year:'2021-22', emoji:'📦', color:'blue',   pts:'~310'},
+  {id:'replay',       name:'REPLAY™',        year:'2020-21', emoji:'🌳', color:'teal',   pts:'~290'},
+  {id:'cityshaper',   name:'CITY SHAPER™',   year:'2019-20', emoji:'🏙️', color:'purple', pts:'~300'},
+  {id:'intoorbit',    name:'INTO ORBIT™',    year:'2018-19', emoji:'🚀', color:'amber',  pts:'~280'},
+];
+
+/* ════════════════════════════════════════════════
+   STATE
+════════════════════════════════════════════════ */
+let selectedMissions = new Set();
+let chatHistory      = [];
+let currentSeason    = 'unearthed';
+let currentPlatform  = 'ev3';
+
+/* ════════════════════════════════════════════════
+   NAVIGATION
+════════════════════════════════════════════════ */
+function go(view) {
+  document.querySelectorAll('.view').forEach(v => {
+    v.style.display = 'none'; v.classList.remove('active');
+  });
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+
+  const el = document.getElementById('view-' + view);
+  el.style.display = (view === 'chat') ? 'flex' : 'block';
+  el.classList.add('active');
+
+  const map = { chat:'ai assistant', maps:'maps', code:'code', score:'score', robot:'robot' };
+  document.querySelectorAll('.nav-item').forEach(b => {
+    const lbl = map[view] || view;
+    if (b.textContent.trim().toLowerCase().includes(lbl.split(' ')[0])) b.classList.add('active');
+  });
+
+  if (view === 'score') renderScores();
+}
+
+/* ════════════════════════════════════════════════
+   TABS
+════════════════════════════════════════════════ */
+function switchTab(t, el) {
+  document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+  el.classList.add('active');
+  ['current','upcoming','archive'].forEach(n => {
+    const e = document.getElementById('tab-' + n);
+    if (e) e.style.display = (n === t) ? 'block' : 'none';
+  });
+  if (t === 'archive') renderArchive();
+}
+
+/* ════════════════════════════════════════════════
+   SEASON PICKER
+════════════════════════════════════════════════ */
+function pickSeason(el, name, pts) {
+  document.querySelectorAll('.season-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  document.getElementById('ctx-text').textContent = `Map: ${name} · Up to ${pts} pts`;
+  document.getElementById('ctx-bar').style.display = 'flex';
+}
+
+/* ════════════════════════════════════════════════
+   ARCHIVE
+════════════════════════════════════════════════ */
+function renderArchive() {
+  const g = document.getElementById('archive-grid');
+  g.innerHTML = ARCHIVE.map(s => `
+    <div class="season-card" onclick="pickArchiveSeason('${s.id}','${s.name}','${s.pts}')">
+      <div class="season-thumb ${s.color}">${s.emoji}<div class="yr-badge">${s.year}</div></div>
+      <div class="season-info">
+        <div class="season-name">${s.name}</div>
+        <div class="season-pts">${s.pts} pts</div>
+      </div>
+    </div>`).join('');
+}
+
+function pickArchiveSeason(id, name, pts) {
+  document.querySelectorAll('#archive-grid .season-card').forEach(c => c.classList.remove('selected'));
+  event.currentTarget.classList.add('selected');
+  const ms = MISSIONS[id];
+  const cont = document.getElementById('archive-missions');
+  if (ms) {
+    cont.innerHTML = `
+      <div class="divider"></div>
+      <div class="section-hdr"><div class="section-title">Missions — ${name}</div></div>` +
+      ms.map(m => `
+        <div class="mission-row">
+          <div class="m-pts">${m.pts}pt</div>
+          <div><div class="m-title">${m.name}</div><div class="m-desc">${m.desc}</div></div>
+        </div>`).join('');
+  } else {
+    cont.innerHTML = `
+      <div class="divider"></div>
+      <div class="card">
+        <div style="font-size:12px;color:var(--text-secondary);margin-bottom:8px">
+          Full mission list for ${name} is available via the AI assistant.
+        </div>
+        <button class="btn primary" style="font-size:12px" onclick="
+          document.getElementById('chat-input').value='List all missions and point values for ${name} FLL season and generate EV3 Python code for the top 3 highest-scoring missions.';
+          go('chat')">
+          Ask AI about ${name} missions ↗
+        </button>
+      </div>`;
+  }
+}
+
+/* ════════════════════════════════════════════════
+   MISSIONS
+════════════════════════════════════════════════ */
+function renderMissions() {
+  const ms = MISSIONS[currentSeason] || [];
+  document.getElementById('mission-list').innerHTML = ms.map(m => `
+    <div class="mission-row${selectedMissions.has(m.id) ? ' sel' : ''}" onclick="toggleM('${m.id}')">
+      <div class="m-pts">${m.pts}pt</div>
+      <div>
+        <div class="m-title">${m.name}</div>
+        <div class="m-desc">${m.desc}</div>
+      </div>
+      <div class="m-check">${selectedMissions.has(m.id) ? '<i class="ti ti-check"></i>' : ''}</div>
+    </div>`).join('');
+  document.getElementById('sel-count').textContent = `${selectedMissions.size} selected`;
+}
+
+function toggleM(id) {
+  selectedMissions.has(id) ? selectedMissions.delete(id) : selectedMissions.add(id);
+  renderMissions();
+  updateScore();
+}
+
+/* ════════════════════════════════════════════════
+   SCORE TRACKER
+════════════════════════════════════════════════ */
+function renderScores() {
+  const ms = MISSIONS[currentSeason] || [];
+  document.getElementById('score-list').innerHTML = ms.map(m => `
+    <div style="display:flex;align-items:center;gap:9px;padding:8px 0;border-bottom:0.5px solid var(--border)">
+      <div onclick="toggleScore('${m.id}')" style="
+        width:20px;height:20px;border-radius:50%;cursor:pointer;
+        border:1.5px solid ${m.done ? 'var(--purple-600)' : 'var(--border-strong)'};
+        background:${m.done ? 'var(--purple-600)' : 'transparent'};
+        display:flex;align-items:center;justify-content:center;
+        color:#fff;font-size:11px">
+        ${m.done ? '<i class="ti ti-check"></i>' : ''}
+      </div>
+      <span style="flex:1;font-size:13px;color:${m.done ? 'var(--text-primary)' : 'var(--text-secondary)'}">${m.name}</span>
+      <span class="pill ${m.done ? 'green' : 'amber'}">${m.done ? '+' + m.pts : m.pts} pts</span>
+    </div>`).join('');
+  updateScore();
+}
+
+function toggleScore(id) {
+  const m = (MISSIONS[currentSeason] || []).find(x => x.id === id);
+  if (m) { m.done = !m.done; renderScores(); }
+}
+
+function updateScore() {
+  const ms = MISSIONS[currentSeason] || [];
+  const done = ms.filter(m => m.done);
+  document.getElementById('tot').textContent   = done.reduce((s, m) => s + m.pts, 0);
+  document.getElementById('mdone').textContent = done.length;
+  document.getElementById('mleft').textContent = ms.filter(m => !m.done).reduce((s, m) => s + m.pts, 0);
+}
+
+function resetScores() {
+  (MISSIONS[currentSeason] || []).forEach(m => m.done = false);
+  renderScores();
+}
+
+/* ════════════════════════════════════════════════
+   CHAT
+════════════════════════════════════════════════ */
+const SYSTEM_PROMPT = `You are an expert FLL (FIRST Lego League) robot programming assistant with up-to-date knowledge of all seasons.
+
+CURRENT SEASON DATA (sourced live from firstinspires.org):
+Season: UNEARTHED™ 2025-26 — Archaeology theme
+15 missions:
+  M01 Surface Brushing — 30 pts — Remove soil deposits without touching the brush
+  M02 Map Reveal — 30 pts — Shift topsoil to reveal the buried map
+  M03 Mineshaft Explorer — 30 pts — Minecart through the shaft (coopertition bonus available)
+  M04 Careful Recovery — 30 pts — Extract artifact without knocking support beams
+  M05 Who Lived Here? — 20 pts — Restore floor of ancient structure to upright
+  M06 Forge — 20 pts — Release ore blocks away from the forge
+  M07 Heavy Lifting — 30 pts — Lift millstone off its base
+  M08 Silo — 30 pts — Remove preserved food pieces from silo
+  M09 What's on Sale? — 30 pts — Raise roof and market wares
+  M10 Tip the Scales — 20 pts — Tip the ancient scale and remove the pan
+  M11 Angler Artifacts — 20 pts — Fish artifacts with hook mechanism
+  M12 Salvage Operation — 30 pts — Lift and seat the statue head
+  M13 Statue Rebuild — 25 pts — Deliver statue head to display area
+  M14 Forum — 25 pts — Deliver artifacts to forum, arrange them
+  M15 Site Marking — 15 pts — Drop flag at unmarked archaeological site
+
+UPCOMING: BIOGLOW™ 2026-27 — Biodiversity theme, releases August 4, 2026
+
+PAST SEASONS: SUBMERGED™ 2024-25, MASTERPIECE™ 2023-24, SUPERPOWERED™ 2022-23,
+CARGO CONNECT™ 2021-22, REPLAY™ 2020-21, CITY SHAPER™ 2019-20, INTO ORBIT™ 2018-19,
+HYDRO DYNAMICS™ 2017-18, ANIMAL ALLIES™ 2016-17, TRASH TREK™ 2015-16, and more back to 2013.
+
+CODING RULES:
+- Default to EV3 pybricks Python unless user specifies Spike Prime
+- For Spike Prime, use the spike module (hub, Motor, ColorSensor, etc.)
+- Always include comments explaining each movement
+- Suggest attachment types where relevant
+- When debugging, explain what went wrong and provide the corrected code
+- For video debugging: ask user to describe what they see happening and fix accordingly
+- Be concise but thorough`;
+
+async function sendMsg() {
+  const inp  = document.getElementById('chat-input');
+  const text = inp.value.trim();
+  if (!text) return;
+  inp.value = ''; inp.style.height = '';
+
+  addMsg('user', text);
+  chatHistory.push({ role: 'user', content: text });
+  const typing = addTyping();
+
+  try {
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 1500,
+        system: SYSTEM_PROMPT,
+        messages: chatHistory
+      })
+    });
+
+    if (!resp.ok) throw new Error(`API error ${resp.status}`);
+    const data  = await resp.json();
+    const reply = data.content?.[0]?.text || 'Sorry, no response received.';
+
+    typing.remove();
+    chatHistory.push({ role: 'assistant', content: reply });
+    addMsg('ai', reply);
+  } catch (e) {
+    typing.remove();
+    addMsg('ai', `Connection error: ${e.message}. Make sure you are running this file through a server or Claude.ai environment where the Anthropic API is accessible.`);
+  }
+}
+
+function addMsg(role, text) {
+  const area = document.getElementById('chat-msgs');
+  const d    = document.createElement('div');
+  d.className = `msg${role === 'user' ? ' user' : ''}`;
+
+  // Format code blocks
+  const formatted = text.replace(/```[\w]*\n?([\s\S]*?)```/g,
+    (_, code) => `</div><div class="code-blk">${escHtml(code.trim())}</div><div>`);
+
+  d.innerHTML = `
+    <div class="av ${role === 'ai' ? 'ai' : 'u'}">
+      ${role === 'ai' ? '<i class="ti ti-robot"></i>' : 'U'}
+    </div>
+    <div class="bubble"><div>${formatted}</div></div>`;
+  area.appendChild(d);
+  area.scrollTop = area.scrollHeight;
+}
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function addTyping() {
+  const area = document.getElementById('chat-msgs');
+  const d    = document.createElement('div');
+  d.className = 'msg';
+  d.innerHTML = `<div class="av ai"><i class="ti ti-robot"></i></div>
+    <div class="bubble"><div class="typing"><span></span><span></span><span></span></div></div>`;
+  area.appendChild(d);
+  area.scrollTop = area.scrollHeight;
+  return d;
+}
+
+function chatKey(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMsg(); } }
+function autoH(el)  { el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 120) + 'px'; }
+
+function clearChat() {
+  chatHistory = [];
+  document.getElementById('chat-msgs').innerHTML = `
+    <div class="msg"><div class="av ai"><i class="ti ti-robot"></i></div>
+    <div class="bubble">New session started! Which mission should we code?</div></div>`;
+}
+
+/* ════════════════════════════════════════════════
+   HELPERS
+════════════════════════════════════════════════ */
+function handleFile(inp) {
+  if (!inp.files[0]) return;
+  const n = inp.files[0].name;
+  const v = inp.files[0].type.startsWith('video');
+  document.getElementById('chat-input').value =
+    `[${v ? 'Video' : 'Image'}: ${n}] I have uploaded my robot ${v ? 'video' : 'photo'}. `;
+  go('chat');
+  document.getElementById('chat-input').focus();
+}
+
+function handleRobotFile(inp) {
+  if (!inp.files[0]) return;
+  const n = inp.files[0].name;
+  const v = inp.files[0].type.startsWith('video');
+  document.getElementById('chat-input').value =
+    `I have uploaded my robot ${v ? 'video' : 'photo'} (${n}). Please analyze my robot, identify all motors and sensors, and generate EV3 Python code for the selected UNEARTHED 2025-26 missions.`;
+  go('chat');
+  document.getElementById('chat-input').focus();
+}
+
+function genCode() {
+  const sel = [...selectedMissions];
+  if (!sel.length) { alert('Select at least one mission first!'); return; }
+  const ms  = (MISSIONS[currentSeason] || []).filter(m => sel.includes(m.id));
+  const list = ms.map(m => `${m.name} (${m.pts} pts)`).join(', ');
+  document.getElementById('chat-input').value =
+    `Generate complete ${currentPlatform === 'spike' ? 'Spike Prime' : 'EV3 Python'} code for these UNEARTHED 2025-26 missions: ${list}. Include all functions, detailed comments, and an efficient run sequence that completes them in a single robot run.`;
+  go('chat');
+}
+
+function robotGenCode() {
+  document.getElementById('chat-input').value =
+    'My robot has: Motor B = left drive, Motor C = right drive, Motor A = arm attachment, Sensor 1 = color sensor, Sensor 4 = gyro. Generate EV3 Python code for the UNEARTHED Surface Brushing (M01) and Map Reveal (M02) missions using this exact configuration.';
+  go('chat');
+}
+
+function videoDebug() {
+  document.getElementById('chat-input').value = 'My robot is having a problem with a mission. Here is what is happening: ';
+  go('chat');
+  document.getElementById('chat-input').focus();
+}
+
+function debugChat() {
+  const code = document.getElementById('code-body').innerText;
+  document.getElementById('chat-input').value =
+    `Please review my code and suggest improvements:\n\`\`\`python\n${code}\n\`\`\``;
+  go('chat');
+}
+
+/* ════════════════════════════════════════════════
+   CODE EDITOR
+════════════════════════════════════════════════ */
+function setPlatform(p) {
+  currentPlatform = p;
+  const labels = { ev3: 'EV3 Python', spike: 'Spike Prime' };
+  document.getElementById('plat-badge').textContent = labels[p];
+  ['ev3','spike'].forEach(id => {
+    const b = document.getElementById('btn-' + id);
+    if (b) b.classList.toggle('primary', id === p);
+  });
+}
+
+function copyCode() {
+  const code = document.getElementById('code-body').innerText;
+  navigator.clipboard.writeText(code).then(() => {
+    const btn = document.querySelector('[onclick="copyCode()"]');
+    const orig = btn.innerHTML;
+    btn.innerHTML = '<i class="ti ti-check"></i> Copied!';
+    setTimeout(() => btn.innerHTML = orig, 2000);
+  }).catch(() => alert('Copy failed — please manually select and copy the code.'));
+}
+
+function dlCode() {
+  const code = document.getElementById('code-body').innerText;
+  const a    = document.createElement('a');
+  a.href     = 'data:text/plain;charset=utf-8,' + encodeURIComponent(code);
+  a.download = 'fll_unearthed_missions.py';
+  a.click();
+}
+
+/* ════════════════════════════════════════════════
+   INIT
+════════════════════════════════════════════════ */
+renderMissions();
+renderScores();
+updateScore();
+</script>
+</body>
+</html>
